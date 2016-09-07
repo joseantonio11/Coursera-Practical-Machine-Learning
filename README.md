@@ -1,5 +1,4 @@
-# Coursera-Practical-Machine-Learning
-Project Coursera Practical Machine Learning
+# Coursera Practical Machine Learning
 
 ### Project Description
 
