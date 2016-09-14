@@ -14,7 +14,7 @@ Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible t
 
 One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
 
-This project has the purpose to predict the manner in which users perform the exercises. There are 5 possible results, reported in the $classe$ variable:
+This project has the purpose to predict the manner in which users perform the exercises. There are 5 possible results, reported in the `classe` variable:
 
 * A: exactly according to the specification
 * B: throwing the elbows to the front
@@ -22,14 +22,18 @@ This project has the purpose to predict the manner in which users perform the ex
 * D: lowering the dumbbell only halfway
 * E: throwing the hips to the front
 
-The data for the project is available here:
-[Training](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv) 
-[Test](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv)
+[Read more: ]<http://groupware.les.inf.puc-rio.br/har#ixzz4KEWLKYo1>
 
-Based on the dataset the aim of this project is to predict the classe based on data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants.
+The data for the project is available at:
 
-## 2 - LIBRARIES
-```{r setup, include=FALSE}
+[Training Dataset:  ]<https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv> 
+
+[Testing Dataset:  ]<https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv>
+
+The objective of this project is to predict the `classe` based on data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants.
+
+## 2 - Libraries
+```{r, echo=TRUE}
 library(knitr)
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, fig.width=10, fig.height=5)
 options(width=120)
@@ -39,8 +43,8 @@ library(rattle)
 set.seed(6266) # set contact random seed
 ```
 
-## 3 - DATASET LOADING
-Read the Data from Datasets
+## 3 - Dataset Loading
+
 ```{r, echo=TRUE}
 trainUrl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
 testUrl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
@@ -49,7 +53,7 @@ download.file(testUrl, "pml-testing.csv",  method="curl")
 rm(trainUrl); rm(testUrl)
 ```
 
-## 4 - WRANGLING
+## 4 - Wrangling Dataset
 Organizing a new dataset with only the data that is necessary for EDA and ML Training data.
 
 ```{r, echo=TRUE}
@@ -76,20 +80,21 @@ dim(training); dim(testing)
 
 With our cleanup, as you can see, now we have a reduced number of variables, that will be used for analysis.
 
-## 5 - PLOTING THE DATA FOR PRELIMINARY EDA
+## 5 - Plotting Dataset for EDA
 This project has purpose to predict the manner in which users perform the exercises based on varialbe `classe` classified as A,B,C,D and E. 
-Lets use this variable `classe` in the plot, to see the frequency of each levels in training dataset.
 
-```{r}
+Lets use the variable `classe` in the plot, to see the frequency of each levels in training dataset.
+
+```{r, echo=TRUE}
 plot(training$classe, col = "blue", main="Histogram of the Classe Levels")
 ```
 
-Observe that A classe seems to be the most frequent and D classe the least.
+The A classe seems to be the most frequent and D classe the least.
 
-## 6 - PARTITION TRAINING DATASET 
+## 6 - Partition Training Dataset 
 
-To enable cross-validation lets make two datas subsets using 70% for trainingSet and 30% for testSet.
-This method will allow us to apply our ML Prediction Models and evaluate bias and variance.
+To enable cross-validation lets make two subsets using 70% for Training and 30% for Testing.
+This method will allow us to apply ML Prediction Models and evaluate bias and variance.
 
 ```{r,echo=TRUE}
 partition <- createDataPartition(y=training$classe, p=0.7, list=FALSE)
@@ -99,15 +104,15 @@ rm(partition)
 ```
 
 
-## 7 - PREDICTION MODELS
+## 7 - Predictions Models
 
-Lets implement here the Regression Tree model and Random Forest.
+Lets implement the Regression Tree model and Random Forest.
 
 ### 7.1 - Regression Tree
 
 Decision tree model is good for classification problems.
 
-```{r}
+```{r, echo=TRUE}
 treeFit=tree(classe~.,data=trainingSet) # Tree package
 summary(treeFit)
 plot(treeFit)
@@ -116,14 +121,14 @@ text(treeFit,pretty=0, cex =.8)
 
 ### 7.2 - RPart from the Caret package.
 
-```{r}
+```{r, echo=TRUE}
 rpartFit <- train(classe ~ .,method="rpart",data=trainingSet) # library Caret
 print(rpartFit$finalModel)
 fancyRpartPlot(rpartFit$finalModel) # library Rattle
 ```
 
 Rpart has a little much accurate result than Tree.
-Rpart has some methods, and one of them is Class with good precision.
+Rpart has some methods, and one of them is `class` with good precision.
 Lets try it. te. See below.
 
 ```{r,echo=TRUE}
@@ -139,32 +144,35 @@ cmatrix1 <- confusionMatrix(predict1, testingSet$classe)
 cmatrix1
 ```
 
-The accuracy shows a good results using Rpart, but a great Regression Method, used for resolution of problems in Kaggle, is Random Forests.
+The accuracy shows a good results using Rpart, but a great Regression Method, used for resolution of problems in Kaggle, is Random Forests. Lets apply it now into our Project. 
 
-Lets apply it to our Project. 
+### 7.3 - Random Forest
 
-### 7.3 - Random Forest - Model choosed
-
-```{r}
+```{r, echo=TRUE}
 modelRandom <- randomForest(classe ~. , data=trainingSet, method="class")
-# Prediction Model:
+
+# Prediction Model
 modelpred <- predict(modelRandom, testingSet, type = "class")
-# Test results on our test.set data:
+
+# Test results on our testingSet
 confusionMatrix(modelpred, testingSet$classe)
 ```
 
-Random Random Forest method outperformed the Decision Tree method.  
-The accuracy for random forests was 0.9958 whereas the decision tree was 0.6953.
-
-Since our accuracy is above 99% for the random forest model in our cross-validation data, we should see very few misclassifications as compared to the decision tree model, which will only be 69.5% accurate.
+As seen by the result of the confusionmatrix, the accuracy for random forests was 0.9958 (very good sensitivity and specificity values) whereas the decision tree was 0.69.
+The accuracy is above 99% for the random forest model in our cross-validation data with few misclassifications as compared to the decision tree model.
 
 ## 8 - Submission Data for Grading
-Since we know we are going to use random forests based on our decision above, we will apply the model to the test dataset:
 
-```{r}
+### 8.1 - Trained Model on the Twenty Testing Data
+
+Random Forests was the choose for this project. Lets apply it to our Testing dataset using the predictor on the test data.
+
+```{r, echo=TRUE}
 answersubmission <- predict(modelRandom, testing, type="class")
 answersubmission
 ```
+
+The answer above is the model machine learning algorithm applyied to the 20 test cases availabe in the test data. It scores 100% of the submission (the 20 values to be predict), that will be submitted to answer the questions of Course Project Prediction Quiz. 
 
 
 
