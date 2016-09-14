@@ -7,7 +7,7 @@ output: html_document
 
 ## Predictions using the Weight Lifting Exercises Dataset
 
-[GitHub link for Project in HTML ]<http://bit.ly/2c8Mbti>  
+[GitHub link for Project in HTML: ]<http://bit.ly/2c8Mbti>  
 
 
 ## 1 - Summary
